@@ -13,8 +13,8 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/supabase/types";
-import EditProfileModal from "@/components/dashboard/EditProfileModal";
 import ApplicationStatusModal from "@/components/dashboard/ApplicationStatusModal";
+import Link from "next/link";
 
 // Circular Gauge Component for R-Score
 function CircularGauge({ 
@@ -141,7 +141,6 @@ function ApplyModal({
 export default function StudentDashboardPage() {
   const [selectedGrant, setSelectedGrant] = useState<typeof grants[0] | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
   
@@ -149,6 +148,12 @@ export default function StudentDashboardPage() {
 
   const fetchProfileData = useCallback(async () => {
     try {
+      // Check if Supabase environment variables are configured
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        console.warn("Supabase environment variables are not configured. Profile features will be disabled.");
+        return null;
+      }
+
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
 
@@ -169,17 +174,14 @@ export default function StudentDashboardPage() {
       
       return data;
     } catch (error) {
+      // Only log if it's not a missing env var error (which we already handled)
+      if (error instanceof Error && error.message.includes("Missing Supabase environment variables")) {
+        return null;
+      }
       console.error("Error fetching profile:", error);
       return null;
     }
   }, []);
-
-  const fetchProfile = useCallback(async () => {
-    const data = await fetchProfileData();
-    if (data) {
-      setProfile(data);
-    }
-  }, [fetchProfileData]);
 
   useEffect(() => {
     (async () => {
@@ -213,7 +215,8 @@ export default function StudentDashboardPage() {
   };
 
   const profileCompletion = calculateProfileCompletion();
-  const displayName = profile?.full_name || "Scholar";
+  // Display user's real name if available, otherwise "Student"
+  const displayName = profile?.full_name || "Student";
   const rScore = profile?.r_score ?? null;
 
   return (
@@ -224,13 +227,13 @@ export default function StudentDashboardPage() {
           <h1 className="text-2xl font-bold text-white">
             Welcome, {displayName}.
           </h1>
-          <button
-            onClick={() => setIsEditModalOpen(true)}
+          <Link
+            href="/dashboard/student/profile"
             className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 hover:text-white font-medium px-4 py-2 rounded-lg transition-all"
           >
             <Edit size={16} />
             Edit Profile
-          </button>
+          </Link>
         </div>
         <div>
           <div className="flex items-center justify-between mb-2">
@@ -399,14 +402,6 @@ export default function StudentDashboardPage() {
         onClose={() => setIsStatusModalOpen(false)}
         grantTitle={selectedGrant?.title}
         grantUniversity={selectedGrant?.university}
-      />
-
-      {/* Edit Profile Modal */}
-      <EditProfileModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        profile={profile}
-        onUpdate={fetchProfile}
       />
     </div>
   );

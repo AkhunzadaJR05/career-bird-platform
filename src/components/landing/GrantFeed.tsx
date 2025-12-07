@@ -5,12 +5,15 @@ import Link from "next/link";
 import { ArrowRight, CheckCircle2, Zap, Filter, ChevronDown, X } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
+import ApplicationModal from "@/components/dashboard/ApplicationModal";
+import type { Grant } from "@/lib/data";
 
 interface GrantFeedProps {
   limit?: number; // Limit number of grants to display (undefined = show all)
+  isDashboardContext?: boolean; // If true, links stay within dashboard; if false, redirect to signup
 }
 
-export default function GrantFeed({ limit = 6 }: GrantFeedProps) {
+export default function GrantFeed({ limit = 6, isDashboardContext = false }: GrantFeedProps) {
   const searchParams = useSearchParams();
   const initialCountry = searchParams?.get('country') || 'All';
   const [degreeFilter, setDegreeFilter] = useState<'MS' | 'PhD' | 'All'>('All');
@@ -18,6 +21,8 @@ export default function GrantFeed({ limit = 6 }: GrantFeedProps) {
   const [fundingTypeFilter, setFundingTypeFilter] = useState<string>('All');
   const [fieldFilter, setFieldFilter] = useState<string>('All');
   const [showFilters, setShowFilters] = useState(initialCountry !== 'All');
+  const [selectedGrant, setSelectedGrant] = useState<Grant | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Get unique values for filters
   const countries = useMemo(() => {
@@ -80,12 +85,18 @@ export default function GrantFeed({ limit = 6 }: GrantFeedProps) {
               </span>
             </p>
           </div>
-          <Link 
-            href="/auth/signup"
-            className="text-white border border-slate-700 hover:border-teal-500 hover:text-teal-400 px-6 py-3 rounded-full transition-all duration-300 flex items-center gap-2"
-          >
-            View All 500+ Grants <ArrowRight className="w-4 h-4" />
-          </Link>
+          {isDashboardContext ? (
+            <span className="text-white border border-slate-700 px-6 py-3 rounded-full flex items-center gap-2 opacity-50 cursor-not-allowed">
+              View All 500+ Grants <ArrowRight className="w-4 h-4" />
+            </span>
+          ) : (
+            <Link 
+              href="/auth/signup"
+              className="text-white border border-slate-700 hover:border-teal-500 hover:text-teal-400 px-6 py-3 rounded-full transition-all duration-300 flex items-center gap-2"
+            >
+              View All 500+ Grants <ArrowRight className="w-4 h-4" />
+            </Link>
+          )}
         </div>
 
         {/* Degree Level Toggle */}
@@ -292,12 +303,15 @@ export default function GrantFeed({ limit = 6 }: GrantFeedProps) {
                       <span className="text-xs font-normal text-slate-500 ml-1">/ year</span>
                     </div>
                   </div>
-                  <Link 
-                    href="/auth/signup"
+                  <button
+                    onClick={() => {
+                      setSelectedGrant(grant);
+                      setIsModalOpen(true);
+                    }}
                     className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white group-hover:bg-teal-500 group-hover:text-black transition-all"
                   >
                     <ArrowRight className="w-4 h-4" />
-                  </Link>
+                  </button>
                 </div>
 
               </div>
@@ -315,6 +329,13 @@ export default function GrantFeed({ limit = 6 }: GrantFeedProps) {
           </div>
         )}
       </div>
+
+      {/* Application Modal */}
+      <ApplicationModal
+        grant={selectedGrant}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </section>
   );
 }

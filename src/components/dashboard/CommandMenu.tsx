@@ -51,14 +51,14 @@ export function CommandMenu() {
           </Command.Empty>
 
           <Command.Group heading="Suggested Grants" className="text-xs text-gray-500 font-medium mb-2 px-2 mt-2">
-            <CommandItem onSelect={() => runCommand(() => router.push('/dashboard/grants/1'))}>
+            <CommandItem onSelect={() => runCommand(() => router.push('/dashboard/student/grants'))}>
               <FileText className="w-4 h-4 mr-2 text-cyan-400" />
               <div className="flex flex-col">
                 <span className="text-sm text-white">Deep Learning for MRI Analysis</span>
                 <span className="text-xs text-gray-500">TUM Munich • €1.5M Funding</span>
               </div>
             </CommandItem>
-            <CommandItem onSelect={() => runCommand(() => router.push('/dashboard/grants/2'))}>
+            <CommandItem onSelect={() => runCommand(() => router.push('/dashboard/student/grants'))}>
               <FileText className="w-4 h-4 mr-2 text-cyan-400" />
               <div className="flex flex-col">
                 <span className="text-sm text-white">Generative AI for Climate</span>
@@ -74,7 +74,7 @@ export function CommandMenu() {
               <LayoutDashboard className="w-4 h-4 mr-2" />
               Battle Station
             </CommandItem>
-            <CommandItem onSelect={() => runCommand(() => router.push('/dashboard/profile'))}>
+            <CommandItem onSelect={() => runCommand(() => router.push('/dashboard/student/profile'))}>
               <User className="w-4 h-4 mr-2" />
               Profile Settings
             </CommandItem>

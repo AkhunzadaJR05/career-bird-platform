@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/supabase/types";
+import ResumeParser from "./ResumeParser";
+import Toast from "./Toast";
 
 interface EditProfileModalProps {
   isOpen: boolean;
@@ -24,9 +26,11 @@ export default function EditProfileModal({
     gpa: "",
     skills: "",
     resume_link: "",
+    bio: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [toastVisible, setToastVisible] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -36,9 +40,19 @@ export default function EditProfileModal({
         gpa: profile.gpa?.toString() || "",
         skills: profile.skills?.join(", ") || "",
         resume_link: profile.resume_link || "",
+        bio: (profile as any).bio || "",
       });
     }
   }, [profile]);
+
+  const handleResumeParse = (data: { skills: string[]; bio: string }) => {
+    setFormData((prev) => ({
+      ...prev,
+      skills: data.skills.length > 0 ? data.skills.join(", ") : prev.skills,
+      bio: data.bio || prev.bio,
+    }));
+    setToastVisible(true);
+  };
 
   if (!isOpen) return null;
 
@@ -48,6 +62,13 @@ export default function EditProfileModal({
     setError(null);
 
     try {
+      // Check if Supabase environment variables are configured
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        setError("Supabase is not configured. Please set up your environment variables.");
+        setLoading(false);
+        return;
+      }
+
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
 
@@ -74,6 +95,7 @@ export default function EditProfileModal({
           gpa: gpaValue,
           skills: skillsArray.length > 0 ? skillsArray : null,
           resume_link: formData.resume_link || null,
+          bio: formData.bio || null,
           updated_at: new Date().toISOString(),
         })
         .eq("user_id", user.id);
@@ -116,6 +138,9 @@ export default function EditProfileModal({
               {error}
             </div>
           )}
+
+          {/* Resume Parser */}
+          <ResumeParser onParse={handleResumeParse} />
 
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -182,6 +207,21 @@ export default function EditProfileModal({
 
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
+              Bio
+            </label>
+            <textarea
+              value={formData.bio}
+              onChange={(e) =>
+                setFormData({ ...formData, bio: e.target.value })
+              }
+              rows={4}
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-teal-500/50 transition-colors resize-none"
+              placeholder="Tell us about yourself, your research interests, and career goals..."
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               Resume Link
             </label>
             <input
@@ -213,6 +253,13 @@ export default function EditProfileModal({
           </div>
         </form>
       </div>
+
+      {/* Toast Notification */}
+      <Toast
+        message="Profile auto-filled from Resume!"
+        isVisible={toastVisible}
+        onClose={() => setToastVisible(false)}
+      />
     </div>
   );
 }

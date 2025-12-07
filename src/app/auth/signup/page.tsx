@@ -1,16 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/global/Navbar";
 import { Suspense, useRef, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Points, PointMaterial } from "@react-three/drei";
 import * as THREE from "three";
-import { Quote } from "lucide-react";
+import { Quote, Chrome } from "lucide-react";
 import { z } from "zod";
+import { createClient } from "@/lib/supabase/client";
+import ErrorToast from "@/components/dashboard/ErrorToast";
 
 // Create sphere geometry once outside component
 const sphereGeometry = new THREE.SphereGeometry(1.5, 64, 64);
@@ -69,6 +71,19 @@ const testimonials = [
   }
 ];
 
+// Zod validation schema for email
+const emailSchema = z.string()
+  .email("Please enter a valid email address")
+  .refine((email) => {
+    // Ensure it has a proper domain extension (at least 2 characters after the dot)
+    const domainPart = email.split("@")[1];
+    if (!domainPart) return false;
+    const parts = domainPart.split(".");
+    return parts.length >= 2 && parts[parts.length - 1].length >= 2;
+  }, {
+    message: "Email must have a valid domain extension (e.g., .com, .edu, .org)"
+  });
+
 // Zod validation schema for password
 const passwordSchema = z.string()
   .min(8, "Password must be at least 8 characters long")
@@ -77,18 +92,69 @@ const passwordSchema = z.string()
 
 export default function SignupPage() {
   const [userType, setUserType] = useState<"student" | "professor">("student");
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [isLoadingGoogle, setIsLoadingGoogle] = useState(false);
+  const [googleError, setGoogleError] = useState<string | null>(null);
+  const [showErrorToast, setShowErrorToast] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // Handle query parameters for grant application intent and role
+  useEffect(() => {
+    const intent = searchParams?.get("intent");
+    const grantId = searchParams?.get("id");
+    const role = searchParams?.get("role");
+    
+    // Handle role parameter - automatically set user type
+    if (role === "professor") {
+      setUserType("professor");
+    } else if (role === "student") {
+      setUserType("student");
+    }
+    
+    if (intent === "apply" && grantId) {
+      // Store grant ID in sessionStorage for use after signup
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("pendingGrantApplication", grantId);
+      }
+    }
+  }, [searchParams]);
+
+  const validateEmail = (emailValue: string): boolean => {
+    if (emailValue.length === 0) {
+      setEmailError("");
+      return false;
+    }
+    const result = emailSchema.safeParse(emailValue);
+    if (!result.success) {
+      setEmailError(result.error.issues[0].message);
+      return false;
+    }
+    setEmailError("");
+    return true;
+  };
 
   const validatePassword = (pwd: string): boolean => {
     const result = passwordSchema.safeParse(pwd);
     if (!result.success) {
-      setPasswordError(result.error.errors[0].message);
+      setPasswordError(result.error.issues[0].message);
       return false;
     }
     setPasswordError("");
     return true;
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newEmail = e.target.value;
+    setEmail(newEmail);
+    if (newEmail.length > 0) {
+      validateEmail(newEmail);
+    } else {
+      setEmailError("");
+    }
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,13 +167,92 @@ export default function SignupPage() {
     }
   };
 
+  const isEmailValid = email.length > 0 && emailError === "";
   const isPasswordValid = password.length > 0 && passwordError === "";
+  const isFormValid = isEmailValid && isPasswordValid;
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (validatePassword(password)) {
+    const emailValid = validateEmail(email);
+    const passwordValid = validatePassword(password);
+    
+    if (emailValid && passwordValid) {
+      // Check for redirect parameter from middleware
+      const redirectPath = searchParams?.get("redirect");
+      
+      // Check if there's a pending grant application
+      const pendingGrantId = typeof window !== "undefined" 
+        ? sessionStorage.getItem("pendingGrantApplication") 
+        : null;
+      
+      if (pendingGrantId) {
+        // Redirect to grants page with the grant ID
+        router.push(`/dashboard/student/grants?highlight=${pendingGrantId}`);
+        sessionStorage.removeItem("pendingGrantApplication");
+      } else if (redirectPath) {
+        // Redirect to the original destination
+        router.push(redirectPath);
+      } else {
+        // Default dashboard path
+        const dashboardPath = userType === "professor" ? "/dashboard/professor" : "/dashboard/student";
+        router.push(dashboardPath);
+      }
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      setIsLoadingGoogle(true);
+      setGoogleError(null);
+      setShowErrorToast(false);
+      
+      // Environment check - log in development only
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Google Login Debug] Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? '✅ Configured' : '❌ Missing');
+        console.log('[Google Login Debug] Supabase Anon Key:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✅ Configured' : '❌ Missing');
+      }
+      
+      // Check if Supabase is configured
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        const errorMsg = "Supabase is not configured. Please set up your environment variables.";
+        setGoogleError(errorMsg);
+        setShowErrorToast(true);
+        setIsLoadingGoogle(false);
+        return;
+      }
+
+      const supabase = createClient();
       const dashboardPath = userType === "professor" ? "/dashboard/professor" : "/dashboard/student";
-      router.push(dashboardPath);
+      
+      // Ensure redirectTo is properly set
+      const redirectTo = `${window.location.origin}/auth/callback?next=${dashboardPath}`;
+      
+      console.log('[Google Login] Initiating OAuth with redirectTo:', redirectTo);
+      
+      const { error, data } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: redirectTo,
+        },
+      });
+
+      if (error) {
+        console.error('[Google Login Error]', error);
+        const errorMsg = error.message || "Failed to sign in with Google. Please try again.";
+        setGoogleError(errorMsg);
+        setShowErrorToast(true);
+        setIsLoadingGoogle(false);
+      } else {
+        // OAuth redirect will happen automatically, so we don't need to do anything here
+        console.log('[Google Login] OAuth initiated successfully', data);
+      }
+    } catch (error: any) {
+      console.error('[Google Login Exception]', error);
+      const errorMsg = error.message || 
+        "An unexpected error occurred. Please check your Supabase configuration and try again.";
+      setGoogleError(errorMsg);
+      setShowErrorToast(true);
+      setIsLoadingGoogle(false);
     }
   };
 
@@ -195,6 +340,48 @@ export default function SignupPage() {
                 </div>
               </div>
 
+              {/* Google Login Button */}
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                disabled={isLoadingGoogle}
+                className={cn(
+                  "w-full rounded-md border border-white/20 bg-white text-black px-4 py-3",
+                  "text-base font-semibold transition-all flex items-center justify-center gap-3",
+                  "hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-white/50",
+                  "disabled:opacity-50 disabled:cursor-not-allowed"
+                )}
+              >
+                <Chrome size={20} />
+                {isLoadingGoogle ? "Connecting..." : "Continue with Google"}
+              </button>
+              
+              {googleError && (
+                <div className="bg-red-500/20 border border-red-500/30 text-red-400 text-sm p-3 rounded-lg">
+                  {googleError}
+                </div>
+              )}
+
+              {/* Error Toast */}
+              <ErrorToast
+                message={googleError || "An error occurred"}
+                isVisible={showErrorToast}
+                onClose={() => {
+                  setShowErrorToast(false);
+                  setGoogleError(null);
+                }}
+              />
+
+              {/* Divider */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-white/10"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white/5 text-slate-400">Or continue with email</span>
+                </div>
+              </div>
+
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label
@@ -207,15 +394,23 @@ export default function SignupPage() {
                     type="email"
                     id="email"
                     name="email"
+                    value={email}
+                    onChange={handleEmailChange}
                     required
                     className={cn(
-                      "mt-2 block w-full rounded-md border border-white/10 bg-white/5 px-4 py-3",
-                      "text-slate-200 placeholder-slate-500 focus:border-teal-500 focus:outline-none",
-                      "focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:ring-offset-[#0B0F19]",
-                      "transition-colors"
+                      "mt-2 block w-full rounded-md border bg-white/5 px-4 py-3",
+                      "text-slate-200 placeholder-slate-500 focus:outline-none",
+                      "focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#0B0F19]",
+                      "transition-colors",
+                      emailError
+                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                        : "border-white/10 focus:border-teal-500 focus:ring-teal-500"
                     )}
                     placeholder="you@example.com"
                   />
+                  {emailError && (
+                    <p className="mt-2 text-sm text-red-500">{emailError}</p>
+                  )}
                 </div>
                 <div>
                   <label
@@ -248,12 +443,12 @@ export default function SignupPage() {
                 </div>
                 <button
                   type="submit"
-                  disabled={!isPasswordValid}
+                  disabled={!isFormValid}
                   className={cn(
                     "w-full rounded-md border border-teal-500 bg-teal-500/10 px-4 py-3",
                     "text-base font-semibold text-teal-400 transition-all",
                     "focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:ring-offset-[#0B0F19]",
-                    isPasswordValid
+                    isFormValid
                       ? "hover:bg-teal-500/20 hover:shadow-[0_0_20px_rgba(0,128,128,0.5)] cursor-pointer"
                       : "opacity-50 cursor-not-allowed"
                   )}

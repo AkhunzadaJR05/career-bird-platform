@@ -1,11 +1,17 @@
 "use client";
 
 import React, { useState, useRef, Suspense } from "react";
+import Link from "next/link";
 import { GlobeMethods } from "react-globe.gl";
-import Globe3D from "./Globe3D";
+import dynamic from "next/dynamic";
+const Globe3D = dynamic(() => import("./Globe3D"), { 
+  ssr: false,
+  loading: () => <div className="w-full h-full bg-transparent" /> // Placeholder while loading
+});
 import IntelligentSearch from "./IntelligentSearch";
 import { Grant } from "@/lib/data";
 import { motion } from "framer-motion";
+import { GraduationCap, Briefcase } from "lucide-react";
 
 function GlobeFallback() {
   return (
@@ -77,11 +83,34 @@ export default function Hero() {
           />
         </motion.div>
 
-        {/* Optional: Stats or CTA below search */}
+        {/* CTA Buttons */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-2xl"
+        >
+          <Link
+            href="/auth/signup?role=student"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-teal-500/20 hover:bg-teal-500/30 border border-teal-500/30 text-teal-400 font-semibold px-8 py-4 rounded-lg transition-all hover:shadow-[0_0_20px_rgba(6,182,212,0.4)]"
+          >
+            <GraduationCap size={20} />
+            For Students: Find Funding
+          </Link>
+          <Link
+            href="/auth/signup?role=professor"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/20 text-white font-semibold px-8 py-4 rounded-lg transition-all"
+          >
+            <Briefcase size={20} />
+            For Professors: Post a Grant
+          </Link>
+        </motion.div>
+
+        {/* Optional: Stats or CTA below buttons */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
           className="mt-8 text-center"
         >
           <p className="text-sm text-slate-400">

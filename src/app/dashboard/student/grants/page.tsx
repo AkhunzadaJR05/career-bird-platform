@@ -4,7 +4,7 @@ import React, { Suspense } from "react";
 import GrantFeed from "@/components/landing/GrantFeed";
 
 function GrantsContent() {
-  return <GrantFeed limit={undefined} />;
+  return <GrantFeed limit={undefined} isDashboardContext={true} />;
 }
 
 export default function GrantsPage() {

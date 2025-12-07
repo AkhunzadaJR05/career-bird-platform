@@ -16,35 +16,35 @@ const destinations: Destination[] = [
   {
     name: "Germany",
     country: "Germany",
-    image: "https://images.unsplash.com/photo-1539650116574-75c0c6d73a6e?w=800&h=600&fit=crop",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Berlin_Brandenburger_Tor_Abend.jpg/800px-Berlin_Brandenburger_Tor_Abend.jpg",
     badge: "Tuition Free",
     badgeColor: "bg-teal-500/20 text-teal-400 border-teal-500/30"
   },
   {
     name: "USA",
     country: "USA",
-    image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&h=600&fit=crop",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Empire_State_Building_from_the_Top_of_the_Rock.jpg/800px-Empire_State_Building_from_the_Top_of_the_Rock.jpg",
     badge: "High Funding",
     badgeColor: "bg-purple-500/20 text-purple-400 border-purple-500/30"
   },
   {
     name: "Saudi Arabia",
     country: "Saudi Arabia",
-    image: "https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=800&h=600&fit=crop",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Kingdom_Centre_Riyadh.jpg/800px-Kingdom_Centre_Riyadh.jpg",
     badge: "High Stipend",
     badgeColor: "bg-amber-500/20 text-amber-400 border-amber-500/30"
   },
   {
     name: "UK",
     country: "UK",
-    image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800&h=600&fit=crop",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Palace_of_Westminster_from_the_dome_on_Methodist_Central_Hall.jpg/800px-Palace_of_Westminster_from_the_dome_on_Methodist_Central_Hall.jpg",
     badge: "Research Excellence",
     badgeColor: "bg-blue-500/20 text-blue-400 border-blue-500/30"
   },
   {
     name: "China",
     country: "China",
-    image: "https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&h=600&fit=crop",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/The_Bund_Shanghai_2014.jpg/800px-The_Bund_Shanghai_2014.jpg",
     badge: "CSC Scholarships",
     badgeColor: "bg-red-500/20 text-red-400 border-red-500/30"
   }
@@ -82,6 +82,7 @@ export default function PopularDestinations() {
                   src={destination.image}
                   alt={destination.name}
                   fill
+                  unoptimized
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
@@ -118,7 +119,7 @@ export default function PopularDestinations() {
         {/* Optional: View All Link */}
         <div className="text-center mt-12">
           <Link
-            href="/dashboard/student/grants"
+            href="/auth/signup"
             className="inline-flex items-center gap-2 text-slate-400 hover:text-teal-400 transition-colors text-sm"
           >
             View all destinations

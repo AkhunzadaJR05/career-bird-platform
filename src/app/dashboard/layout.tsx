@@ -3,7 +3,8 @@
 import React from "react";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 import { 
 
@@ -17,11 +18,14 @@ import {
 
   LogOut,
 
-  User
+  User,
+
+  Globe
 
 } from "lucide-react"; 
 
 import { CommandMenu } from "@/components/dashboard/CommandMenu";
+import AuthGuard from "@/components/auth/AuthGuard";
 
 
 export default function DashboardLayout({
@@ -35,12 +39,34 @@ export default function DashboardLayout({
 }) {
 
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    try {
+      // Check if Supabase is configured before attempting sign out
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        console.warn('Supabase not configured. Redirecting to home page.');
+        router.push('/');
+        return;
+      }
+
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      router.push('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      // Even if sign out fails, redirect to home page
+      router.push('/');
+    }
+  };
 
 
 
   // Determine header title based on current route
 
   const getHeaderTitle = () => {
+
+    if (pathname?.includes("/mobility")) return "Command Center / Mobility OS";
 
     if (pathname?.includes("/student")) return "Command Center / Student Overview";
 
@@ -50,7 +76,7 @@ export default function DashboardLayout({
 
     if (pathname?.includes("/applications")) return "Command Center / My Applications";
 
-    if (pathname?.includes("/profile")) return "Command Center / Profile";
+    if (pathname?.includes("/profile")) return "Command Center / My Profile";
 
     return "Command Center";
 
@@ -69,15 +95,15 @@ export default function DashboardLayout({
       <aside className="w-64 border-r border-white/10 bg-white/5 backdrop-blur-lg hidden md:flex flex-col h-screen sticky top-0">
 
         <div className="p-6 border-b border-white/10">
-
-          <h1 className="text-xl font-bold bg-gradient-to-r from-teal-400 to-teal-600 bg-clip-text text-transparent">
-
-            Career Bird
-
-          </h1>
-
-          <p className="text-xs text-gray-400 mt-1">Research Intelligence</p>
-
+          <Link 
+            href={pathname?.includes("/professor") ? "/dashboard/professor" : "/dashboard/student"}
+            className="block hover:opacity-80 transition-opacity cursor-pointer"
+          >
+            <h1 className="text-xl font-bold bg-gradient-to-r from-teal-400 to-teal-600 bg-clip-text text-transparent">
+              Career Bird
+            </h1>
+            <p className="text-xs text-gray-400 mt-1">Research Intelligence</p>
+          </Link>
         </div>
 
 
@@ -88,9 +114,11 @@ export default function DashboardLayout({
 
           <NavItem href="/dashboard/student/grants" icon={<Search size={20} />} label="Find Grants" active={pathname === "/dashboard/student/grants"} />
 
-          <NavItem href="/dashboard/applications" icon={<Briefcase size={20} />} label="My Applications" active={pathname === "/dashboard/applications"} />
+          <NavItem href="/dashboard/student/applications" icon={<Briefcase size={20} />} label="My Applications" active={pathname === "/dashboard/student/applications"} />
 
-          <NavItem href="/dashboard/profile" icon={<User size={20} />} label="Profile" active={pathname === "/dashboard/profile"} />
+          <NavItem href="/dashboard/student/mobility" icon={<Globe size={20} />} label="Mobility OS" active={pathname === "/dashboard/student/mobility"} />
+
+          <NavItem href="/dashboard/student/profile" icon={<User size={20} />} label="My Profile" active={pathname === "/dashboard/student/profile"} />
 
         </nav>
 
@@ -98,7 +126,10 @@ export default function DashboardLayout({
 
         <div className="p-4 border-t border-white/10">
 
-           <button className="flex items-center gap-3 text-gray-400 hover:text-white w-full px-4 py-3 rounded-lg hover:bg-white/5 transition-all">
+           <button 
+            onClick={handleSignOut}
+            className="flex items-center gap-3 text-gray-400 hover:text-white w-full px-4 py-3 rounded-lg hover:bg-white/5 transition-all"
+          >
 
             <LogOut size={20} />
 
@@ -126,7 +157,9 @@ export default function DashboardLayout({
 
         <div className="p-8">
 
-          {children}
+          <AuthGuard>
+            {children}
+          </AuthGuard>
 
         </div>
 

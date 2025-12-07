@@ -7,6 +7,7 @@ export interface Profile {
   skills: string[] | null
   r_score: number | null
   resume_link: string | null
+  role?: 'student' | 'professor' | 'admin' | null
   created_at?: string
   updated_at?: string
 }
@@ -23,6 +24,7 @@ export interface Job {
   degree: 'MS' | 'PhD'
   field: string
   description?: string | null
+  tryout?: boolean | null
   created_at?: string
   updated_at?: string
 }
@@ -32,6 +34,9 @@ export interface Application {
   job_id: string
   student_id: string
   status: 'pending' | 'reviewed' | 'accepted' | 'rejected'
+  elevator_pitch?: string | null
+  portfolio_link?: string | null
+  resume_filename?: string | null
   created_at?: string
   updated_at?: string
   student_profile?: Profile
