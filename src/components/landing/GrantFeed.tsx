@@ -3,7 +3,7 @@
 import { grants } from "@/lib/data";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Zap, Filter, ChevronDown, X } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import ApplicationModal from "@/components/dashboard/ApplicationModal";
 import type { Grant } from "@/lib/data";
@@ -13,7 +13,7 @@ interface GrantFeedProps {
   isDashboardContext?: boolean; // If true, links stay within dashboard; if false, redirect to signup
 }
 
-export default function GrantFeed({ limit = 6, isDashboardContext = false }: GrantFeedProps) {
+function GrantFeedContent({ limit = 6, isDashboardContext = false }: GrantFeedProps) {
   const searchParams = useSearchParams();
   const initialCountry = searchParams?.get('country') || 'All';
   const [degreeFilter, setDegreeFilter] = useState<'MS' | 'PhD' | 'All'>('All');
@@ -337,5 +337,21 @@ export default function GrantFeed({ limit = 6, isDashboardContext = false }: Gra
         onClose={() => setIsModalOpen(false)}
       />
     </section>
+  );
+}
+
+export default function GrantFeed({ limit = 6, isDashboardContext = false }: GrantFeedProps) {
+  return (
+    <Suspense fallback={
+      <section className="relative py-24 bg-[#0B0F19] overflow-hidden">
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="min-h-[400px] flex items-center justify-center text-teal-400">
+            Loading grants...
+          </div>
+        </div>
+      </section>
+    }>
+      <GrantFeedContent limit={limit} isDashboardContext={isDashboardContext} />
+    </Suspense>
   );
 }

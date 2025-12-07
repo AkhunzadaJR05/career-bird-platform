@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Navbar from "@/components/global/Navbar";
 import Hero from "@/components/landing/Hero";
 import StatsStrip from "@/components/landing/StatsStrip";
@@ -12,7 +13,13 @@ export default function Home() {
       <Hero />
       <StatsStrip />
       <PopularDestinations />
-      <GrantFeed />
+      <Suspense fallback={
+        <div className="min-h-[400px] flex items-center justify-center text-teal-400">
+          Loading grants...
+        </div>
+      }>
+        <GrantFeed />
+      </Suspense>
       <Footer />
     </main>
   );
