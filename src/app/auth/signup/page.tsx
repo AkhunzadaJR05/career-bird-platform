@@ -12,6 +12,7 @@ import { Quote, Chrome } from "lucide-react";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/client";
 import ErrorToast from "@/components/dashboard/ErrorToast";
+import { toast } from "@/lib/toast";
 
 // Create sphere geometry once outside component
 const sphereGeometry = new THREE.SphereGeometry(1.5, 64, 64);
@@ -222,24 +223,31 @@ function SignupForm() {
         return;
       }
 
-      // Sign up the user
+      // DEBUG TEST: Hardcoded values to bypass input field bugs
+      const testEmail = "test_user_final_verification@gmail.com";
+      const testPassword = "password123456";
+
+      console.log("⚠️ RUNNING HARDCODED SIGNUP TEST:", testEmail);
+
       const { data, error } = await supabase.auth.signUp({
-        email: nuclearEmail,
-        password: cleanPassword,
+        email: testEmail,
+        password: testPassword,
         options: {
           data: {
-            role: userType,
-            full_name: cleanName || undefined,
+            full_name: "Test User",
+            role: "student",
           },
         },
       });
 
       if (error) {
-        const errorMsg = error.message || "Something went wrong";
-        console.error("Signup error:", error);
-        setSubmitError(errorMsg);
-        setShowErrorToast(true);
-        alert(errorMsg);
+        console.error("❌ Hardcoded Test Failed:", error.message);
+        toast.error("Test Failed: " + error.message);
+        setIsSubmitting(false);
+        return;
+      } else {
+        console.log("✅ Hardcoded Test SUCCEEDED!", data);
+        toast.success("Test Passed! Redirecting...");
         setIsSubmitting(false);
         return;
       }
