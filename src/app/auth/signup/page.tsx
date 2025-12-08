@@ -182,7 +182,6 @@ function SignupForm() {
       // Sanitize user input to avoid validation issues with stray spaces
       const cleanEmail = email.trim();
       const cleanPassword = password.trim();
-      const cleanName = ""; // No full name field present, keep placeholder for future use
 
       // Nuclear sanitize: strip quotes and spaces to avoid email_address_invalid
       const nuclearEmail = email.replace(/['"\s]/g, "");
@@ -223,31 +222,20 @@ function SignupForm() {
         return;
       }
 
-      // DEBUG TEST: Hardcoded values to bypass input field bugs
-      const testEmail = "test_user_final_verification@gmail.com";
-      const testPassword = "password123456";
-
-      console.log("⚠️ RUNNING HARDCODED SIGNUP TEST:", testEmail);
-
+      // Execute signup with cleaned email/password
       const { data, error } = await supabase.auth.signUp({
-        email: testEmail,
-        password: testPassword,
+        email: nuclearEmail,
+        password: cleanPassword,
         options: {
           data: {
-            full_name: "Test User",
-            role: "student",
+            role: userType,
           },
         },
       });
 
       if (error) {
-        console.error("❌ Hardcoded Test Failed:", error.message);
-        toast.error("Test Failed: " + error.message);
-        setIsSubmitting(false);
-        return;
-      } else {
-        console.log("✅ Hardcoded Test SUCCEEDED!", data);
-        toast.success("Test Passed! Redirecting...");
+        console.error("Signup error:", error.message);
+        toast.error("Signup failed: " + error.message);
         setIsSubmitting(false);
         return;
       }
@@ -264,13 +252,16 @@ function SignupForm() {
         // Redirect to grants page with the grant ID
         router.push(`/dashboard/student/grants?highlight=${pendingGrantId}`);
         sessionStorage.removeItem("pendingGrantApplication");
-      } else if (redirectPath) {
-        // Redirect to the original destination
-        router.push(redirectPath);
       } else {
-        // Default dashboard path
-        const dashboardPath = userType === "professor" ? "/dashboard/professor" : "/dashboard/student";
-        router.push(dashboardPath);
+        // 1. Determine the default dashboard based on role
+        const defaultDashboard = userType === "professor" ? "/dashboard/professor" : "/dashboard/student";
+
+        // 2. Use the redirectPath if it exists (and is a string), otherwise use default
+        // The '||' operator handles null/undefined/empty string automatically
+        const finalDestination = redirectPath || defaultDashboard;
+
+        // 3. Navigate
+        router.push(finalDestination);
       }
     } catch (error: any) {
       console.error("Signup exception:", error);
