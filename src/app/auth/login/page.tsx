@@ -3,8 +3,50 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/global/Navbar";
+import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { toast } from "@/lib/toast";
 
 export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); // Prevent native form submit refresh
+
+    // Show immediate feedback
+    setIsLoading(true);
+    toast.success("Signing in...");
+
+    // Sanitize user input similar to signup
+    const cleanEmail = email.trim();
+    const cleanPassword = password.trim();
+    const nuclearEmail = cleanEmail.replace(/['"\s]/g, "");
+
+    try {
+      const supabase = createClient();
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: nuclearEmail,
+        password: cleanPassword,
+      });
+
+      if (error) {
+        toast.error(error.message || "Login failed");
+        setIsLoading(false);
+        return;
+      }
+
+      // Determine destination (default student; adjust if role logic is added)
+      const destination = "/dashboard/student";
+      window.location.href = destination;
+    } catch (err: any) {
+      toast.error(err?.message || "Login failed");
+      setIsLoading(false);
+    }
+  };
+
   return (
     <main className="min-h-screen bg-[#0B0F19]">
       <Navbar />
@@ -17,7 +59,7 @@ export default function LoginPage() {
                 Sign in to access your research opportunities
               </p>
             </div>
-            <form className="space-y-6">
+            <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
                 <label
                   htmlFor="email"
@@ -30,6 +72,8 @@ export default function LoginPage() {
                   id="email"
                   name="email"
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className={cn(
                     "mt-2 block w-full rounded-md border border-slate-800 bg-slate-900/50 px-4 py-3",
                     "text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none",
@@ -51,6 +95,8 @@ export default function LoginPage() {
                   id="password"
                   name="password"
                   required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className={cn(
                     "mt-2 block w-full rounded-md border border-slate-800 bg-slate-900/50 px-4 py-3",
                     "text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none",
@@ -87,14 +133,16 @@ export default function LoginPage() {
               </div>
               <button
                 type="submit"
+                disabled={isLoading}
                 className={cn(
                   "w-full rounded-md border border-cyan-500 bg-cyan-500/10 px-4 py-3",
                   "text-base font-semibold text-cyan-400 transition-all",
                   "hover:bg-cyan-500/20 hover:shadow-[0_0_20px_rgba(6,182,212,0.5)]",
-                  "focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-black/50"
+                  "focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-black/50",
+                  isLoading ? "opacity-50 cursor-not-allowed" : ""
                 )}
               >
-                Sign In
+                {isLoading ? "Signing in..." : "Sign In"}
               </button>
             </form>
             <div className="mt-6 text-center">
@@ -114,4 +162,3 @@ export default function LoginPage() {
     </main>
   );
 }
-
