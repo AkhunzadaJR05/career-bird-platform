@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Magic Link - The Career Bird</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f5f5f5;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" style="max-width: 600px; width: 100%; border-collapse: collapse; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 40px 30px; text-align: center;">
+              <div style="display: inline-block; background-color: rgba(255, 255, 255, 0.2); border-radius: 12px; padding: 12px; margin-bottom: 20px;">
+                <span style="font-size: 32px;">🔐</span>
+              </div>
+              <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">
+                Your Magic Link
+              </h1>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td style="padding: 40px;">
+              <h2 style="margin: 0 0 16px; color: #1a1a1a; font-size: 24px; font-weight: 600;">
+                Passwordless login requested for The Career Bird
+              </h2>
+              
+              <p style="margin: 0 0 16px; color: #666666; font-size: 16px; line-height: 1.6;">
+                A passwordless login was requested for your Career Bird account registered to {{ .Email }}. This email contains your one-time login link for The Career Bird platform.
+              </p>
+
+              <p style="margin: 0 0 24px; color: #666666; font-size: 16px; line-height: 1.6;">
+                After opening the link, you will be signed into your Career Bird account where you can browse MS and PhD scholarship opportunities, manage your profile, and track your applications.
+              </p>
+
+              <!-- CTA Button -->
+              <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 32px 0;">
+                <tr>
+                  <td align="center" style="padding: 0;">
+                    <a href="{{ .ConfirmationURL }}" style="display: inline-block; padding: 16px 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);">
+                      Open Login Link for The Career Bird
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Alternative Link -->
+              <p style="margin: 24px 0 0; color: #999999; font-size: 14px; line-height: 1.6;">
+                Alternative: Copy and paste this URL into your web browser to sign into The Career Bird:
+              </p>
+              <p style="margin: 8px 0 0; word-break: break-all; padding: 12px; background-color: #f8f9fa; border-radius: 6px; font-family: 'Courier New', monospace;">
+                <a href="{{ .ConfirmationURL }}" style="color: #667eea; text-decoration: underline; font-size: 13px;">
+                  {{ .ConfirmationURL }}
+                </a>
+              </p>
+
+              <!-- Account Info -->
+              <div style="margin-top: 32px; padding: 16px; background-color: #f8f9fa; border-radius: 8px; border-left: 4px solid #667eea;">
+                <p style="margin: 0 0 8px; color: #1a1a1a; font-size: 14px; font-weight: 600;">
+                  Request Information:
+                </p>
+                <p style="margin: 0; color: #666666; font-size: 14px; line-height: 1.6;">
+                  <strong>Account Email:</strong> {{ .Email }}<br>
+                  <strong>Service:</strong> The Career Bird ({{ .SiteURL }})<br>
+                  <strong>Request Type:</strong> Passwordless authentication<br>
+                  <strong>Expiration:</strong> Valid for 1 hour<br>
+                  <strong>Usage:</strong> Single-use link
+                </p>
+              </div>
+
+              <!-- Security Note -->
+              <div style="margin-top: 16px; padding: 16px; background-color: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <p style="margin: 0; color: #856404; font-size: 14px; line-height: 1.6;">
+                  <strong style="color: #856404;">Security Notice:</strong> If you did not request a passwordless login for The Career Bird account ({{ .Email }}), please delete this email. Your account remains secure. For security concerns, contact The Career Bird support at {{ .SiteURL }}/contact or reply to this email.
+                </p>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 32px 40px; background-color: #f8f9fa; border-top: 1px solid #e9ecef;">
+              <p style="margin: 0 0 12px; color: #666666; font-size: 14px; line-height: 1.6;">
+                Need help? <a href="{{ .SiteURL }}/contact" style="color: #667eea; text-decoration: none;">Contact our support team</a>
+              </p>
+              <p style="margin: 0; color: #999999; font-size: 12px; line-height: 1.6;">
+                © 2025 The Career Bird. All rights reserved.<br>
+                <a href="{{ .SiteURL }}/privacy" style="color: #999999; text-decoration: underline;">Privacy Policy</a> • 
+                <a href="{{ .SiteURL }}/terms" style="color: #999999; text-decoration: underline;">Terms of Service</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+
+        <!-- Footer Text -->
+        <p style="margin: 24px 0 0; color: #999999; font-size: 12px; text-align: center; max-width: 600px;">
+          This passwordless login email was sent to {{ .Email }} by The Career Bird authentication system ({{ .SiteURL }}). This is a legitimate email from The Career Bird. For assistance, visit {{ .SiteURL }}/contact or reply to this message.
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+
