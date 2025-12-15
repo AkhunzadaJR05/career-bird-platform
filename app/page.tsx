@@ -14,6 +14,15 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 md:py-32">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-blue-950/20 dark:via-background dark:to-indigo-950/20" />
+        <div 
+          className="absolute inset-0 opacity-50 dark:opacity-50"
+          style={{
+            backgroundImage: 'url(/images/1.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}
+        />
 
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="mx-auto max-w-3xl text-center">
@@ -27,7 +36,7 @@ export default function LandingPage() {
             </FadeIn>
 
             <FadeIn delay={0.2}>
-              <p className="mb-8 text-pretty text-lg text-muted-foreground md:text-xl">
+              <p className="mb-8 text-pretty text-lg font-bold text-foreground md:text-xl">
                 The intelligent platform connecting global talent with world-class universities. We combine trust and AI
                 to empower your academic mobility.
               </p>

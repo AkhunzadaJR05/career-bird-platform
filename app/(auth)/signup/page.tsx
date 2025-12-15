@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { EyeIcon, EyeOffIcon } from "lucide-react"
+import { motion } from "framer-motion"
 
 export default function SignupPage() {
   const router = useRouter()
@@ -100,26 +101,70 @@ export default function SignupPage() {
     <div className="min-h-screen grid lg:grid-cols-2">
       {/* Left Side - Testimonial */}
       <div className="hidden lg:flex relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 items-center justify-center p-12">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
-        <div className="relative max-w-lg space-y-8 text-white">
-          <div className="space-y-2">
-            <div className="flex gap-1">
-              {[...Array(5)].map((_, i) => (
-                <svg key={i} className="h-5 w-5 fill-yellow-400" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-              ))}
-            </div>
-            <blockquote className="text-2xl font-medium leading-relaxed text-balance">
-              "This platform transformed my academic career. I found my dream PhD scholarship in weeks."
-            </blockquote>
+      <div className="absolute inset-0">
+          <img src="/images/3.png" alt="Students celebrating" className="h-full w-full object-cover opacity-30" />
+        </div>
+        <div className="relative max-w-lg space-y-12 text-white">
+          <div className="space-y-4">
+            <h1 className="text-4xl font-bold leading-tight">
+              Your Gateway to Global Academic Opportunities
+            </h1>
+            <p className="text-xl text-blue-100">
+              Join thousands of students who are advancing their careers through fully-funded scholarships worldwide.
+            </p>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-400 to-indigo-400" />
-            <div>
-              <p className="font-semibold">Sarah Jenkins</p>
-              <p className="text-sm text-blue-200">PhD Candidate, Oxford University</p>
+          <div className="grid grid-cols-2 gap-8">
+            <div className="space-y-2">
+              <div className="text-5xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+                15K+
+              </div>
+              <p className="text-blue-200">Active Students</p>
+            </div>
+            <div className="space-y-2">
+              <div className="text-5xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+                1,000+
+              </div>
+              <p className="text-blue-200">Universities</p>
+            </div>
+            <div className="space-y-2">
+              <div className="text-5xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+                140+
+              </div>
+              <p className="text-blue-200">Countries</p>
+            </div>
+            <div className="space-y-2">
+              <div className="text-5xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+                $50M+
+              </div>
+              <p className="text-blue-200">In Scholarships</p>
+            </div>
+          </div>
+
+          <div className="space-y-4 pt-4 border-t border-white/20">
+            <div className="flex items-start gap-3">
+              <div className="h-6 w-6 rounded-full bg-green-400 flex items-center justify-center flex-shrink-0 mt-1">
+                <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <p className="text-blue-100">Access fully-funded MS and PhD programs</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="h-6 w-6 rounded-full bg-green-400 flex items-center justify-center flex-shrink-0 mt-1">
+                <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <p className="text-blue-100">Connect directly with professors and universities</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="h-6 w-6 rounded-full bg-green-400 flex items-center justify-center flex-shrink-0 mt-1">
+                <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <p className="text-blue-100">Track applications and deadlines in one place</p>
             </div>
           </div>
         </div>
@@ -127,13 +172,18 @@ export default function SignupPage() {
 
       {/* Right Side - Signup Form */}
       <div className="flex items-center justify-center p-8 bg-background">
-        <div className="w-full max-w-md space-y-8">
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md space-y-8"
+        >
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+            <Link href="/" className="flex items-center gap-2 group">
+              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <span className="text-white text-xl">🐦</span>
               </div>
-              <span className="font-semibold text-lg">The Career Bird</span>
+              <span className="font-bold text-lg">The Career Bird</span>
             </Link>
           </div>
 
@@ -151,7 +201,12 @@ export default function SignupPage() {
           )}
 
           <form onSubmit={handleSignup} className="space-y-6">
-            <div className="space-y-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="space-y-4"
+            >
               <div className="space-y-2">
                 <Label htmlFor="fullName">Full Name</Label>
                 <Input
@@ -234,9 +289,14 @@ export default function SignupPage() {
                   </button>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="flex items-start gap-2">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="flex items-start gap-2"
+            >
               <Checkbox
                 id="terms"
                 checked={agreedToTerms}
@@ -254,9 +314,14 @@ export default function SignupPage() {
                 </Link>
                 .
               </Label>
-            </div>
+            </motion.div>
 
-            <Button type="submit" className="w-full" size="lg" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg"
+              size="lg"
+              disabled={loading}
+            >
               {loading ? "Creating Account..." : "Create Account"}
             </Button>
 
@@ -311,7 +376,7 @@ export default function SignupPage() {
               Log in
             </Link>
           </p>
-        </div>
+        </motion.div>
       </div>
     </div>
   )

@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { EyeIcon, EyeOffIcon, MailIcon } from "lucide-react"
+import { motion } from "framer-motion"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -94,15 +95,20 @@ export default function LoginPage() {
 
       {/* Right Side - Login Form */}
       <div className="flex items-center justify-center p-8 bg-background">
-        <div className="w-full max-w-md space-y-8">
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md space-y-8"
+        >
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2 lg:hidden">
-              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+            <Link href="/" className="flex items-center gap-2 lg:hidden group">
+              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <span className="text-white text-xl">🐦</span>
               </div>
-              <span className="font-semibold text-lg">The Career Bird</span>
+              <span className="font-bold text-lg">The Career Bird</span>
             </Link>
-            <Link href="/contact" className="text-sm text-muted-foreground hover:text-foreground">
+            <Link href="/contact" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Contact Support
             </Link>
           </div>
@@ -119,13 +125,18 @@ export default function LoginPage() {
           )}
 
           <form onSubmit={handleLogin} className="space-y-6">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full bg-transparent"
-              onClick={handleGoogleLogin}
-              disabled={loading}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
             >
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full bg-transparent border-2"
+                onClick={handleGoogleLogin}
+                disabled={loading}
+              >
               <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                 <path
                   fill="currentColor"
@@ -146,6 +157,7 @@ export default function LoginPage() {
               </svg>
               Sign in with Google
             </Button>
+            </motion.div>
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -156,7 +168,12 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="space-y-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="space-y-4"
+            >
               <div className="space-y-2">
                 <Label htmlFor="email">Email Address</Label>
                 <div className="relative">
@@ -201,9 +218,14 @@ export default function LoginPage() {
                   </button>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            <Button type="submit" className="w-full" size="lg" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg"
+              size="lg"
+              disabled={loading}
+            >
               {loading ? "Logging in..." : "Log In"}
             </Button>
           </form>
@@ -224,7 +246,7 @@ export default function LoginPage() {
               Terms of Service
             </Link>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   )
