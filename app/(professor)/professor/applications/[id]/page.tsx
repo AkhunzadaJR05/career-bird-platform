@@ -91,8 +91,9 @@ async function getApplicationData(id: string) {
   }
 }
 
-export default async function ApplicationReviewPage({ params }: { params: { id: string } }) {
-  const { application, documents, tryout } = await getApplicationData(params.id)
+export default async function ApplicationReviewPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const { application, documents, tryout } = await getApplicationData(id)
 
   const candidate = application.profiles
   const grant = application.grants

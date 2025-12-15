@@ -16,7 +16,8 @@ import {
 } from "lucide-react"
 import { ScholarshipBookmarkButton } from "@/components/scholarships/detail/bookmark-button"
 
-export default async function ScholarshipDetailPage({ params }: { params: { id: string } }) {
+export default async function ScholarshipDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await getSupabaseServerClient()
   // Optional: Check for user but don't require authentication (public page)
   const {
@@ -60,7 +61,7 @@ export default async function ScholarshipDetailPage({ params }: { params: { id: 
       )
     `,
     )
-    .eq("id", params.id)
+    .eq("id", id)
     .single()
 
   if (error || !grant) {

@@ -9,58 +9,66 @@ export default async function ScholarshipsPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Fetch grants on server side (publicly accessible - students cannot see created_by field)
-  const { data: grants, error } = await supabase
-    .from("grants")
-    .select(
-      `
-      id,
-      title,
-      description,
-      grant_type,
-      university_id,
-      degree_levels,
-      fields_of_study,
-      eligible_countries,
-      min_gpa,
-      funding_amount,
-      stipend_monthly,
-      covers_tuition,
-      covers_living,
-      deadline,
-      start_date,
-      duration_months,
-      language,
-      application_url,
-      is_featured,
-      created_at,
-      updated_at,
-      universities:university_id (
+  // Fetch only first batch of grants for BLAZING FAST initial load
+  const INITIAL_BATCH_SIZE = 15 // Reduced for faster initial render
+  
+  // Run queries in parallel for speed
+  const [grantsResult, countResult, savedResult] = await Promise.all([
+    // Grants query
+    supabase
+      .from("grants")
+      .select(
+        `
         id,
-        name,
-        country,
-        city,
-        logo_url
+        title,
+        description,
+        grant_type,
+        university_id,
+        degree_levels,
+        fields_of_study,
+        min_gpa,
+        funding_amount,
+        covers_tuition,
+        covers_living,
+        deadline,
+        is_featured,
+        created_at,
+        universities:university_id (
+          id,
+          name,
+          country,
+          city,
+          logo_url
+        )
+      `,
       )
-    `,
-    )
-    .order("created_at", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(INITIAL_BATCH_SIZE),
+    
+    // Total count query
+    supabase
+      .from("grants")
+      .select("*", { count: "exact", head: true }),
+    
+    // Saved grants query (only if user is logged in)
+    user
+      ? supabase
+          .from("saved_grants")
+          .select("grant_id")
+          .eq("user_id", user.id)
+      : Promise.resolve({ data: null }),
+  ])
 
-  // Fetch saved grants only if user is logged in
-  let savedGrants: string[] = []
-  if (user) {
-    const { data: saved } = await supabase
-      .from("saved_grants")
-      .select("grant_id")
-      .eq("user_id", user.id)
-    savedGrants = saved?.map((s) => s.grant_id) || []
-  }
+  const grants = grantsResult.data || []
+  const totalCount = countResult.count || 0
+  const savedGrants = savedResult.data?.map((s: { grant_id: string }) => s.grant_id) || []
 
   return (
     <ScholarshipsPageClient 
       initialGrants={grants || []} 
       initialUser={user || null}
       initialSavedGrants={savedGrants}
+      totalCount={totalCount || 0}
     />
   )
 }
